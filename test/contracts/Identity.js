@@ -1,4 +1,5 @@
-const Identity = artifacts.require('./Identity.sol');
+const Identity = artifacts.require('./Identity_v0.sol');
+const IdentityStorage = artifacts.require('./IdentityStorage.sol');
 const DAVToken = artifacts.require('./DAVToken.sol');
 const expectThrow = require('../helpers/assertRevert');
 const { registerIdentity, sampleIdentities } = require('../helpers/identity');
@@ -6,7 +7,10 @@ const totalSupply = web3.toWei(1771428571, 'ether');
 
 const deployContracts = async () => {
   const TokenContract = await DAVToken.new(totalSupply);
-  return Identity.new(TokenContract.address);
+  const IdentityStorageContract = await IdentityStorage.new();
+  const IdentityContract = await Identity.new(TokenContract.address, IdentityStorageContract.address);
+  await IdentityStorageContract.upgradeVersion(IdentityContract.address);
+  return IdentityContract;
 };
 
 contract('Identity', function(accounts) {

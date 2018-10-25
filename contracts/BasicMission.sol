@@ -1,7 +1,7 @@
 pragma solidity 0.4.24;
 
-import './Identity.sol';
-import './DAVToken.sol';
+import './Identity/Identity_v0.sol';
+import './interfaces/IDAVToken.sol';
 
 
 /**
@@ -38,8 +38,8 @@ contract BasicMission {
     bytes32 id
   );
 
-  DAVToken private token;
-  Identity private identity;
+  IDAVToken private token;
+  Identity_v0 private identity;
 
   /**
    * @dev Constructor
@@ -47,7 +47,7 @@ contract BasicMission {
    * @param _identityContract address of the Identity contract
    * @param _davTokenContract address of the DAVToken contract
    */
-  function BasicMission(Identity _identityContract, DAVToken _davTokenContract) public {
+  constructor(Identity_v0 _identityContract, IDAVToken _davTokenContract) public {
     identity = _identityContract;
     token = _davTokenContract;
   }
