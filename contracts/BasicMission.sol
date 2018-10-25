@@ -1,6 +1,6 @@
 pragma solidity 0.4.24;
 
-import './Identity/Identity_v0.sol';
+import './interfaces/IIdentity.sol';
 import './interfaces/IDAVToken.sol';
 
 
@@ -39,7 +39,7 @@ contract BasicMission {
   );
 
   IDAVToken private token;
-  Identity_v0 private identity;
+  IIdentity private identity;
 
   /**
    * @dev Constructor
@@ -47,7 +47,7 @@ contract BasicMission {
    * @param _identityContract address of the Identity contract
    * @param _davTokenContract address of the DAVToken contract
    */
-  constructor(Identity_v0 _identityContract, IDAVToken _davTokenContract) public {
+  constructor(IIdentity _identityContract, IDAVToken _davTokenContract) public {
     identity = _identityContract;
     token = _davTokenContract;
   }

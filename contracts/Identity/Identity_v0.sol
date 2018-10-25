@@ -2,12 +2,13 @@ pragma solidity 0.4.24;
 
 import '../interfaces/IDAVToken.sol';
 import '../interfaces/IIdentityStorage.sol';
+import '../interfaces/IIdentity.sol';
 
 
 /**
  * @title Identity
  */
-contract Identity_v0 {
+contract Identity_v0 is IIdentity {
 
   IDAVToken private token;
   IIdentityStorage private identityStorage;
