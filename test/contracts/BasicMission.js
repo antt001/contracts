@@ -1,4 +1,4 @@
-const Identity = artifacts.require('./Identity_v0.sol');
+const Identity = artifacts.require('./Identity_v0_1.sol');
 const IdentityStorage = artifacts.require('./IdentityStorage.sol');
 const DAVToken = artifacts.require('./DAVToken.sol');
 const BasicMission = artifacts.require('./BasicMission.sol');
@@ -10,10 +10,15 @@ const expectThrow = require('../helpers/assertRevert');
 
 const deployContracts = async () => {
   const TokenContract = await DAVToken.new(totalSupply);
+  console.log('deploy IdentityStorageContract');
   const IdentityStorageContract = await IdentityStorage.new();
+  console.log('deploy IdentityContract');
   const IdentityContract = await Identity.new(TokenContract.address, IdentityStorageContract.address);
-  await IdentityStorageContract.upgradeVersion(IdentityContract.address);
+  console.log('deploy Identity setLatestVersion');
+  await IdentityStorageContract.setLatestVersion(IdentityContract.address);
+  console.log('deploy BasicMissionContract');
   const BasicMissionContract = await BasicMission.new(IdentityContract.address, TokenContract.address);
+  console.log('deployment id done');
   return { TokenContract, IdentityContract, BasicMissionContract };
 };
 
