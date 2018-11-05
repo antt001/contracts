@@ -1,106 +1,48 @@
-// This code has not been professionally audited, therefore I cannot make any promises about
-// safety or correctness. Use at own risk.
 
 pragma solidity 0.4.24;
 
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
-import '../interfaces/IIdentityStorage.sol';
 
-contract IdentityStorage is IIdentityStorage, Ownable {
+library IdentityStruct {
+  struct DAVIdentity {
+    address wallet;
+    mapping (address => bool) mission_contracts;
+  }    
+}
 
-  address latestVersion;
+contract IdentityStorage is Ownable {
 
-  mapping(bytes32 => uint) uIntStorage;
-  mapping(bytes32 => string) stringStorage;
-  mapping(bytes32 => address) addressStorage;
-  mapping(bytes32 => bytes) bytesStorage;
-  mapping(bytes32 => bool) boolStorage;
-  mapping(bytes32 => int) intStorage;
+  address _latestVersion;
+
+  mapping (address => IdentityStruct.DAVIdentity) private identities;
 
   modifier onlyLatestVersion() {
     require(
-      msg.sender == latestVersion,
+      msg.sender == _latestVersion,
       'Only latest version access is allowed'
     );
     _;
   }
 
-  function upgradeVersion(address _newVersion) public onlyOwner {
-    latestVersion = _newVersion;
+  function setLatestVersion(address newVersion) public onlyOwner {
+    _latestVersion = newVersion;
   }
 
-  // *** Getter Methods ***
-  function getUint(bytes32 _key) external view returns(uint) {
-    return uIntStorage[_key];
+  function createIdentity(address id, address wallet) external onlyLatestVersion {
+    // Register in identities mapping
+    identities[id].wallet = wallet;
   }
 
-  function getString(bytes32 _key) external view returns(string) {
-    return stringStorage[_key];
+  function identityHasMissionType(address id, address missionContract) external view returns(bool) {
+    return identities[id].mission_contracts[missionContract];
   }
 
-  function getAddress(bytes32 _key) external view returns(address) {
-    return addressStorage[_key];
+  function identityAddMissionType(address id, address missionContract) external onlyLatestVersion {
+    // Register in identities mapping
+    identities[id].mission_contracts[missionContract] = true;
   }
 
-  function getBytes(bytes32 _key) external view returns(bytes) {
-    return bytesStorage[_key];
-  }
-
-  function getBool(bytes32 _key) external view returns(bool) {
-    return boolStorage[_key];
-  }
-
-  function getInt(bytes32 _key) external view returns(int) {
-    return intStorage[_key];
-  }
-
-  // *** Setter Methods ***
-  function setUint(bytes32 _key, uint _value) external onlyLatestVersion {
-    uIntStorage[_key] = _value;
-  }
-
-  function setString(bytes32 _key, string _value) external onlyLatestVersion {
-    stringStorage[_key] = _value;
-  }
-
-  function setAddress(bytes32 _key, address _value) external onlyLatestVersion {
-    addressStorage[_key] = _value;
-  }
-
-  function setBytes(bytes32 _key, bytes _value) external onlyLatestVersion {
-    bytesStorage[_key] = _value;
-  }
-
-  function setBool(bytes32 _key, bool _value) external onlyLatestVersion {
-    boolStorage[_key] = _value;
-  }
-
-  function setInt(bytes32 _key, int _value) external onlyLatestVersion {
-    intStorage[_key] = _value;
-  }
-
-  // *** Delete Methods ***
-  function deleteUint(bytes32 _key) external onlyLatestVersion {
-    delete uIntStorage[_key];
-  }
-
-  function deleteString(bytes32 _key) external onlyLatestVersion {
-    delete stringStorage[_key];
-  }
-
-  function deleteAddress(bytes32 _key) external onlyLatestVersion {
-    delete addressStorage[_key];
-  }
-
-  function deleteBytes(bytes32 _key) external onlyLatestVersion {
-    delete bytesStorage[_key];
-  }
-
-  function deleteBool(bytes32 _key) external onlyLatestVersion {
-    delete boolStorage[_key];
-  }
-
-  function deleteInt(bytes32 _key) external onlyLatestVersion {
-    delete intStorage[_key];
+  function getIdentityWallet(address id) external view returns(address) {
+    return identities[id].wallet;
   }
 }

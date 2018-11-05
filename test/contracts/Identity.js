@@ -1,15 +1,15 @@
-const Identity = artifacts.require('./Identity_v0.sol');
+const Identity = artifacts.require('./Identity_v0_1.sol');
 const IdentityStorage = artifacts.require('./IdentityStorage.sol');
 const DAVToken = artifacts.require('./DAVToken.sol');
 const expectThrow = require('../helpers/assertRevert');
-const { registerIdentity, sampleIdentities } = require('../helpers/identity');
+const { registerIdentity, sampleIdentities, signMessage } = require('../helpers/identity');
 const totalSupply = web3.toWei(1771428571, 'ether');
 
 const deployContracts = async () => {
   const TokenContract = await DAVToken.new(totalSupply);
   const IdentityStorageContract = await IdentityStorage.new();
   const IdentityContract = await Identity.new(TokenContract.address, IdentityStorageContract.address);
-  await IdentityStorageContract.upgradeVersion(IdentityContract.address);
+  await IdentityStorageContract.setLatestVersion(IdentityContract.address);
   return IdentityContract;
 };
 
@@ -23,7 +23,7 @@ contract('Identity', function(accounts) {
 
   describe('register', () => {
     it('should not throw when attempting to register with a valid signature', async function() {
-      registerIdentity(IdentityContract, walletAddress);
+      await registerIdentity(IdentityContract, walletAddress);
     });
 
     it('isRegistered should return true for registered address', async function() {
@@ -34,7 +34,7 @@ contract('Identity', function(accounts) {
       );
     });
 
-    it('isRegistered should return flase for unregistered address', async function() {
+    it('isRegistered should return false for unregistered address', async function() {
       const isRegistered = await IdentityContract.isRegistered.call(sampleIdentities[0].id);
       assert.isNotTrue(
         isRegistered
@@ -113,6 +113,30 @@ contract('Identity', function(accounts) {
           accounts[1],
         ),
       );
+    });
+  });
+
+  describe('add mission type to identity', () => {
+    beforeEach(async function() {
+      await registerIdentity(
+        IdentityContract, 
+        walletAddress, 
+        sampleIdentities[1].id,
+        sampleIdentities[1].v,
+        sampleIdentities[1].r,
+        sampleIdentities[1].s
+      );
+    });
+
+    it('should add mission type to identity when signature is valid', async function() {
+      const { id, v, r, s } = signMessage(accounts[1], accounts[0].toLowerCase());
+      await IdentityContract.identityAddMissionType(
+        accounts[1],
+        v,
+        r,
+        s
+      );
+      assert.isTrue(await IdentityContract.identityHasSenderMissionType(accounts[1]));
     });
   });
 });

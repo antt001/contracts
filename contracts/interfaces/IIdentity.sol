@@ -7,4 +7,6 @@ interface IIdentity {
   function verifyOwnership(address _id, address _wallet) external view returns (bool verified);
   function isRegistered(address _id) external view returns (bool);
   function getIdentityWallet(address _id) external view returns (address);
+  function identityHasSenderMissionType(address id) external view returns(bool);
+  function identityAddMissionType(address id, uint8 v, bytes32 r, bytes32 s) external;
 }
