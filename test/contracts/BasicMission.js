@@ -10,15 +10,15 @@ const expectThrow = require('../helpers/assertRevert');
 
 const deployContracts = async () => {
   const TokenContract = await DAVToken.new(totalSupply);
-  console.log('deploy IdentityStorageContract');
+  // console.log('deploy IdentityStorageContract');
   const IdentityStorageContract = await IdentityStorage.new();
-  console.log('deploy IdentityContract');
+  // console.log('deploy IdentityContract');
   const IdentityContract = await Identity.new(TokenContract.address, IdentityStorageContract.address);
-  console.log('deploy Identity setLatestVersion');
+  // console.log('deploy Identity setLatestVersion');
   await IdentityStorageContract.setLatestVersion(IdentityContract.address);
-  console.log('deploy BasicMissionContract');
+  // console.log('deploy BasicMissionContract');
   const BasicMissionContract = await BasicMission.new(IdentityContract.address, TokenContract.address);
-  console.log('deployment id done');
+  // console.log('deployment id done');
   return { TokenContract, IdentityContract, BasicMissionContract };
 };
 

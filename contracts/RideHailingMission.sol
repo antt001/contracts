@@ -12,7 +12,7 @@ import './interfaces/IDAVToken.sol';
  * In the real world, there is very little reason to use this and not one of the
  * contracts that extend it. Consider this an interface, more than an implementation.
  */
-contract BasicMission {
+contract RideHailingMission {
 
   uint256 private nonce;
 

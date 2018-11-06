@@ -10,8 +10,8 @@ import '../interfaces/IIdentity.sol';
  */
 contract Identity_v0_1 is IIdentity {
 
-  IDAVToken private token;
-  IIdentityStorage private identityStorage;
+  IDAVToken private _token;
+  IIdentityStorage private _identityStorage;
 
   // Prefix to added to messages signed by web3
   bytes28 private constant ETH_SIGNED_MESSAGE_PREFIX = '\x19Ethereum Signed Message:\n32';
@@ -28,51 +28,51 @@ contract Identity_v0_1 is IIdentity {
   /**
    * @dev Constructor
    *
-   * @param _davTokenContract address of the DAVToken contract
+   * @param davTokenContract address of the DAVToken contract
    */
-  constructor(IDAVToken _davTokenContract, IIdentityStorage _storage ) public {
-    token = _davTokenContract;
-    identityStorage = _storage;
+  constructor(IDAVToken davTokenContract, IIdentityStorage identityStorage ) public {
+    _token = davTokenContract;
+    _identityStorage = identityStorage;
   }
 
-  function register(address _id, uint8 _v, bytes32 _r, bytes32 _s) public onlyUnregisteredIds(_id) {
+  function register(address id, uint8 v, bytes32 r, bytes32 s) public onlyUnregisteredIds(id) {
     // Generate message hash
     bytes32 prefixedHash = keccak256(abi.encodePacked(ETH_SIGNED_MESSAGE_PREFIX, keccak256(abi.encodePacked(DAV_REGISTRATION_REQUEST))));
     // Verify message signature
     require(
-      ecrecover(prefixedHash, _v, _r, _s) == _id,
+      ecrecover(prefixedHash, v, r, s) == id,
       'Signature is not valid'
     );
 
     // Register in identities mapping
-    identityStorage.createIdentity(_id, msg.sender);
+    _identityStorage.createIdentity(id, msg.sender);
   }
 
   function registerSimple() public onlyUnregisteredIds(msg.sender) {
     // Register in identities mapping
-    identityStorage.createIdentity(msg.sender, msg.sender);
+    _identityStorage.createIdentity(msg.sender, msg.sender);
   }
 
-  function getBalance(address _id) public view returns (uint256 balance) {
-    return token.balanceOf(identityStorage.getIdentityWallet(_id));
+  function getBalance(address id) public view returns (uint256 balance) {
+    return _token.balanceOf(_identityStorage.getIdentityWallet(id));
   }
 
-  function verifyOwnership(address _id, address _wallet) public view returns (bool verified) {
-    return identityStorage.getIdentityWallet(_id) == _wallet;
+  function verifyOwnership(address id, address wallet) public view returns (bool verified) {
+    return _identityStorage.getIdentityWallet(id) == wallet;
   }
 
   // Check identity registration status
-  function isRegistered(address _id) public view returns (bool) {
-    return identityStorage.getIdentityWallet(_id) != 0x0;
+  function isRegistered(address id) public view returns (bool) {
+    return _identityStorage.getIdentityWallet(id) != 0x0;
   }
 
   // Get identity wallet
-  function getIdentityWallet(address _id) public view returns (address) {
-    return identityStorage.getIdentityWallet(_id);
+  function getIdentityWallet(address id) public view returns (address) {
+    return _identityStorage.getIdentityWallet(id);
   }
 
   function identityHasSenderMissionType(address id) public view returns(bool) {
-    return identityStorage.identityHasMissionType(id, msg.sender);
+    return _identityStorage.identityHasMissionType(id, msg.sender);
   }
 
   function identityAddMissionType(address id, uint8 v, bytes32 r, bytes32 s) external {
@@ -93,7 +93,7 @@ contract Identity_v0_1 is IIdentity {
       'Signature is not valid'
     );
 
-    identityStorage.identityAddMissionType(id, msg.sender);
+    _identityStorage.identityAddMissionType(id, msg.sender);
   }
 
   function toAsciiString(bytes32 data) internal pure returns (string) {
