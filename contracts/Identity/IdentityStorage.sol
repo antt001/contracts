@@ -2,6 +2,7 @@
 pragma solidity 0.4.24;
 
 import 'openzeppelin-solidity/contracts/ownership/Ownable.sol';
+import '../interfaces/IIdentityStorage.sol';
 
 library IdentityStruct {
   struct DAVIdentity {
@@ -10,7 +11,7 @@ library IdentityStruct {
   }    
 }
 
-contract IdentityStorage is Ownable {
+contract IdentityStorage is IIdentityStorage, Ownable {
 
   address _latestVersion;
 

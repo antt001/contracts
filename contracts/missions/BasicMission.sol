@@ -1,7 +1,7 @@
 pragma solidity 0.4.24;
 
-import './interfaces/IIdentity.sol';
-import './interfaces/IDAVToken.sol';
+import '../interfaces/IIdentity.sol';
+import '../interfaces/IDAVToken.sol';
 
 
 /**
