@@ -15,7 +15,9 @@ interface IMissionStorage {
   function getMissionBuyer(bytes32 missionId) external returns(address buyer);
   function setMissionBalance(bytes32 missionId, uint256 balance)  external;
   function getMissionBalance(bytes32 missionId) external returns(uint256 balance);
-  function getMissionCost(bytes32 missionId) external returns(uint256 cost);
+  function setMissionActualPrice(bytes32 missionId, uint256 actualPrice) external;
+  function getMissionActualPrice(bytes32 missionId) external returns(uint256 actualPrice);
+  function getMissionDeposit(bytes32 missionId) external returns(uint256 deposit);
   function setMissionIsSigned(bytes32 missionId, bool isSigned)  external;
   function getMissionIsSigned(bytes32 missionId) external returns(bool isSigned);
 }

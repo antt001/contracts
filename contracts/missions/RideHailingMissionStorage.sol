@@ -7,7 +7,8 @@ library MissionStruct {
   struct RideHailingMission {
     address seller;
     address buyer;
-    uint256 cost;
+    uint256 deposit;
+    uint256 actualPrice;
     uint256 balance;
     bool isSigned;
     mapping (uint8 => bool) resolvers;
@@ -36,7 +37,8 @@ contract RideHailingMissionStorage is IMissionStorage, Ownable {
     missions[missionId] = MissionStruct.RideHailingMission({
       seller: sellerId,
       buyer: buyerId,
-      cost: tokenAmount,
+      deposit: tokenAmount,
+      actualPrice: 0,
       balance: tokenAmount,
       isSigned: false
     });
@@ -58,8 +60,16 @@ contract RideHailingMissionStorage is IMissionStorage, Ownable {
     return missions[missionId].balance;
   }
 
-  function getMissionCost(bytes32 missionId) public returns(uint256 cost) {
-    return missions[missionId].cost;
+  function setMissionActualPrice(bytes32 missionId, uint256 actualPrice)  public onlyLatestVersion {
+    missions[missionId].actualPrice = actualPrice;
+  }
+
+  function getMissionActualPrice(bytes32 missionId) public returns(uint256 actualPrice) {
+    return missions[missionId].actualPrice;
+  }
+
+  function getMissionDeposit(bytes32 missionId) public returns(uint256 deposit) {
+    return missions[missionId].deposit;
   }
   
   function setMissionIsSigned(bytes32 missionId, bool isSigned) public onlyLatestVersion {

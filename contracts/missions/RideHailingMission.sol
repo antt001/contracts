@@ -3,6 +3,7 @@ pragma solidity 0.4.24;
 import '../interfaces/IIdentity.sol';
 import '../interfaces/IDAVToken.sol';
 import '../interfaces/IMissionStorage.sol';
+import 'openzeppelin-solidity/contracts/math/SafeMath.sol';
 
 /**
  * @title BasicMission
@@ -13,6 +14,8 @@ import '../interfaces/IMissionStorage.sol';
  * contracts that extend it. Consider this an interface, more than an implementation.
  */
 contract RideHailingMission {
+
+  using SafeMath for uint256;
 
   IMissionStorage private _missionStorage;
   uint256 private nonce;
@@ -78,40 +81,61 @@ contract RideHailingMission {
   }
 
   /**
-  * @notice mark fulfilled a mission
+  * @notice finalize a mission with actualPrice
   * @param missionId The id of the mission
   */
-  function fulfilled(bytes32 missionId) public {
+  function finalizeWithPrice(bytes32 missionId, uint256 actualPrice) public {
     // Verify that message sender controls the seller's wallet
     require(
-      _identity.verifyOwnership(_missionStorage.getMissionBuyer(missionId), msg.sender),
-      'Transaction must be sent from buyer\'s identity wallet'
+      _identity.verifyOwnership(_missionStorage.getMissionSeller(missionId), msg.sender),
+      'Transaction must be sent from seller\'s identity wallet'
     );
     
     require(
       _missionStorage.getMissionIsSigned(missionId) == false,
-      'Mission is already fulfilled'
+      'Mission is already finalized'
     );
 
     require(
-      _missionStorage.getMissionBalance(missionId) == _missionStorage.getMissionCost(missionId),
-      'Mission balance is not equal to mission cost'
+      _missionStorage.getMissionDeposit(missionId) >= actualPrice,
+      'Mission deposit is less then actual price'
+    );
+
+    require(
+      _missionStorage.getMissionBalance(missionId) >= actualPrice,
+      'Mission balance is less then actual price'
     );
     
     require(
-      // address(this).balance >= _missionStorage.getMissionCost(missionId),
-      _token.balanceOf(this) >= _missionStorage.getMissionCost(missionId),
-      'Insufficient token balance in contract'
+      _token.balanceOf(this) >= actualPrice,
+      'Insufficient token balance for payment in contract'
     );
-    
+
+    _missionStorage.setMissionActualPrice(missionId, actualPrice);
+
     // designate mission as signed
     _missionStorage.setMissionIsSigned(missionId, true);
-    _missionStorage.setMissionBalance(missionId, 0);
+    _missionStorage.setMissionBalance(missionId, _missionStorage.getMissionBalance(missionId).sub(actualPrice));
 
     _token.transfer(
       _identity.getIdentityWallet(_missionStorage.getMissionSeller(missionId)),
-      _missionStorage.getMissionCost(missionId)
+      actualPrice
     );
+
+    uint256 change = _missionStorage.getMissionBalance(missionId);
+    if(change > 0) {
+
+      require(
+        _token.balanceOf(this) >= change,
+        'Insufficient token balance for change in contract'
+      );
+
+      _missionStorage.setMissionBalance(missionId, 0);
+      _token.transfer(
+        _identity.getIdentityWallet(_missionStorage.getMissionBuyer(missionId)),
+        change
+      );
+    }
    
     // Event
     emit Signed(missionId);

@@ -111,7 +111,7 @@ contract('RideHailingMission', function(accounts) {
     const createdMissionId = (await createEvent.get())[0].args.id;
     assert.equal(Buffer.from(createdMissionId.substr(2), 'hex').toString(), missionId);
     
-    await MissionContract.fulfilled(missionId, {from: user.wallet});
+    await MissionContract.finalizeWithPrice(missionId, tokenAmount, {from: vehicle.wallet});
   
     // Event received (Signed)
     const events = await signedEvent.get();
@@ -135,92 +135,92 @@ contract('RideHailingMission', function(accounts) {
     // assert.equal(vehicleTokenBalance, missionCost);
   });
 
-  // describe('create', () => {
-  //   const userAirdropAmount = 20;
-  //   const missionCost = 4;
-  //   const tokenAmount = 15;
-  //   let missionId;
-  //   beforeEach(async () => {
-  //     // Airdrop some money to User for testing
-  //     await TokenContract.transfer(user.wallet, userAirdropAmount);
-  //     // User funds basic mission and creates new basic mission
-  //     await TokenContract.approve(MissionContract.address, tokenAmount, {from: user.wallet});
+  describe('create', () => {
+    const userAirdropAmount = 20;
+    const missionCost = 4;
+    const tokenAmount = 15;
+    let missionId;
+    beforeEach(async () => {
+      // Airdrop some money to User for testing
+      await TokenContract.transfer(user.wallet, userAirdropAmount);
+      // User funds basic mission and creates new basic mission
+      await TokenContract.approve(MissionContract.address, tokenAmount, {from: user.wallet});
 
-  //     // generate new unique 128bit id for bid
-  //     let binaryId = new Array(16);
-  //     uuid(null, binaryId, 0);
-  //     missionId = Buffer.from(binaryId).toString('hex');
-  //   });
+      // generate new unique 128bit id for bid
+      let binaryId = new Array(16);
+      uuid(null, binaryId, 0);
+      missionId = Buffer.from(binaryId).toString('hex');
+    });
 
-  //   it('should fire a Create event with the mission id, seller id, and buyer id', async () => {
-  //     await MissionContract.create(missionId, vehicle.id, user.id, tokenAmount, {from: user.wallet, value: missionCost});
+    it('should fire a Create event with the mission id, seller id, and buyer id', async () => {
+      await MissionContract.create(missionId, vehicle.id, user.id, tokenAmount, {from: user.wallet, value: missionCost});
 
-  //     const events = await createEvent.get();
-  //     assert.equal(events.length, 1);
-  //     assert.typeOf(events[0].args.id, 'string');
-  //     assert.equal(events[0].args.id, '0x' + Buffer.from(missionId).toString('hex'));
-  //     assert.equal(events[0].args.sellerId, vehicle.id);
-  //     assert.equal(events[0].args.buyerId, user.id);
-  //   });
+      const events = await createEvent.get();
+      assert.equal(events.length, 1);
+      assert.typeOf(events[0].args.id, 'string');
+      assert.equal(events[0].args.id, '0x' + Buffer.from(missionId).toString('hex'));
+      assert.equal(events[0].args.sellerId, vehicle.id);
+      assert.equal(events[0].args.buyerId, user.id);
+    });
 
-  //   it('should throw if account creating the mission does not control the identity', async () => {
-  //     await expectThrow(
-  //       MissionContract.create(missionId, vehicle.id, user.id, tokenAmount, {
-  //         from: vehicle.wallet,
-  //         value: missionCost
-  //       }),
-  //     );
-  //   });
+    it('should throw if account creating the mission does not control the identity', async () => {
+      await expectThrow(
+        MissionContract.create(missionId, vehicle.id, user.id, tokenAmount, {
+          from: vehicle.wallet,
+          value: missionCost
+        }),
+      );
+    });
 
-  //   xit('should fail if cost is negative');
-  // });
+    xit('should fail if cost is negative');
+  });
 
-  // describe('approve', () => {
-  //   let missionId;
-  //   const userAirdropAmount = 20;
-  //   const missionCost = 4;
-  //   const tokenAmount = 15;
+  describe('approve', () => {
+    let missionId;
+    const userAirdropAmount = 20;
+    const missionCost = 4;
+    const tokenAmount = 15;
 
-  //   beforeEach(async () => {
-  //     // Airdrop some money to User for testing
-  //     // generate new unique 128bit id for bid
-  //     let binaryId = new Array(16);
-  //     uuid(null, binaryId, 0);
-  //     missionId = Buffer.from(binaryId).toString('hex');
+    beforeEach(async () => {
+      // Airdrop some money to User for testing
+      // generate new unique 128bit id for bid
+      let binaryId = new Array(16);
+      uuid(null, binaryId, 0);
+      missionId = Buffer.from(binaryId).toString('hex');
 
-  //     await TokenContract.transfer(user.wallet, userAirdropAmount);
-  //     await TokenContract.approve(MissionContract.address, tokenAmount, {from: user.wallet});
-  //     await MissionContract.create(missionId, vehicle.id, user.id, tokenAmount, {from: user.wallet, value: missionCost});
-  //     // missionId = (await createEvent.get())[0].args.id;
-  //   });
+      await TokenContract.transfer(user.wallet, userAirdropAmount);
+      await TokenContract.approve(MissionContract.address, tokenAmount, {from: user.wallet});
+      await MissionContract.create(missionId, vehicle.id, user.id, tokenAmount, {from: user.wallet, value: missionCost});
+      // missionId = (await createEvent.get())[0].args.id;
+    });
 
-  //   xit('should set mission as signed', async () => {
-  //     await MissionContract.fulfilled(missionId, {from: user.wallet});
-  //     //TODO: chech if mission is signed or remove this test
-  //   });
+    xit('should set mission as signed', async () => {
+      await MissionContract.finalizeWithPrice(missionId, tokenAmount, {from: vehicle.wallet});
+      //TODO: chech if mission is signed or remove this test
+    });
 
-  //   it('should fire a Signed event', async () => {
-  //     await MissionContract.fulfilled(missionId, {from: user.wallet});
-  //     const events = await signedEvent.get();
-  //     let createdMissionId = events[0].args.id;
-  //     assert.equal(events.length, 1);
-  //     assert.equal(Buffer.from(createdMissionId.substr(2), 'hex').toString(), missionId);
-  //   });
+    it('should fire a Signed event', async () => {
+      await MissionContract.finalizeWithPrice(missionId, tokenAmount, {from: vehicle.wallet});
+      const events = await signedEvent.get();
+      let createdMissionId = events[0].args.id;
+      assert.equal(events.length, 1);
+      assert.equal(Buffer.from(createdMissionId.substr(2), 'hex').toString(), missionId);
+    });
 
-  //   it('should deduct the cost from the balance of the buyer', async () => {
-  //     const userTokenBalance = await IdentityContract.getBalance(user.id);
-  //     assert.equal(userTokenBalance.toNumber(), userAirdropAmount - tokenAmount);
-  //   });
+    it('should deduct the cost from the balance of the buyer', async () => {
+      const userTokenBalance = await IdentityContract.getBalance(user.id);
+      assert.equal(userTokenBalance.toNumber(), userAirdropAmount - tokenAmount);
+    });
 
-  //   it('should fail if account signing the mission fulfillment does not control buyer id', async () => {
-  //     await expectThrow(
-  //       MissionContract.fulfilled(missionId, {from: vehicle.wallet})
-  //     );
-  //   });
+    it('should fail if account finalizing the mission does not control seller id', async () => {
+      await expectThrow(
+        MissionContract.finalizeWithPrice(missionId, tokenAmount, {from: user.wallet})
+      );
+    });
 
-  //   xit('should fail if account funding the mission does not have enough tokens');
-  //   xit('should fail if buyer id and mission id do not match');
-  //   xit('should increase the balance of the contract by the mission cost');
-  // });
+    xit('should fail if account funding the mission does not have enough tokens');
+    xit('should fail if buyer id and mission id do not match');
+    xit('should increase the balance of the contract by the mission cost');
+  });
 
 });
