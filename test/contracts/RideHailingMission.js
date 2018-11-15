@@ -110,10 +110,9 @@ contract('RideHailingMission', function(accounts) {
     // Event received (Create)
     const createdMissionId = (await createEvent.get())[0].args.id;
     assert.equal(Buffer.from(createdMissionId.substr(2), 'hex').toString(), missionId);
-
+    
     await MissionContract.fulfilled(missionId, {from: user.wallet});
-    assert.equal(web3.eth.getBalance(MissionContract.address), 0);
-
+  
     // Event received (Signed)
     const events = await signedEvent.get();
     assert.equal(events.length, 1);

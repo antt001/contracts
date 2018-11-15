@@ -4,17 +4,6 @@ import '../interfaces/IIdentity.sol';
 import '../interfaces/IDAVToken.sol';
 import '../interfaces/IMissionStorage.sol';
 
-contract ERC20 {
-    function totalSupply() public constant returns (uint);
-    function balanceOf(address tokenOwner) public constant returns (uint balance);
-    function allowance(address tokenOwner, address spender) public constant returns (uint remaining);
-    function transfer(address to, uint tokens) public returns (bool success);
-    function approve(address spender, uint tokens) public returns (bool success);
-    function transferFrom(address from, address to, uint tokens) public returns (bool success);
-    event Transfer(address indexed from, address indexed to, uint tokens);
-    event Approval(address indexed tokenOwner, address indexed spender, uint tokens);
-}
-
 /**
  * @title BasicMission
  * @dev The most basic contract for conducting Missions.
@@ -119,17 +108,10 @@ contract RideHailingMission {
     _missionStorage.setMissionIsSigned(missionId, true);
     _missionStorage.setMissionBalance(missionId, 0);
 
-    ERC20(_token).transfer(
+    _token.transfer(
       _identity.getIdentityWallet(_missionStorage.getMissionSeller(missionId)),
       _missionStorage.getMissionCost(missionId)
     );
-    // _token.approve(this, _missionStorage.getMissionCost(missionId));
-    // _token.transferFrom(
-    //   this,
-    //   _identity.getIdentityWallet(_missionStorage.getMissionSeller(missionId)),
-    //   _missionStorage.getMissionCost(missionId)
-    // );
-
    
     // Event
     emit Signed(missionId);

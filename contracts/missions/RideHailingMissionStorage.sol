@@ -50,7 +50,7 @@ contract RideHailingMissionStorage is IMissionStorage, Ownable {
     return missions[missionId].seller;
   }
 
-  function setMissionBalance(bytes32 missionId, uint256 balance)  public onlyOwner {
+  function setMissionBalance(bytes32 missionId, uint256 balance)  public onlyLatestVersion {
     missions[missionId].balance = balance;
   }
 
@@ -62,7 +62,7 @@ contract RideHailingMissionStorage is IMissionStorage, Ownable {
     return missions[missionId].cost;
   }
   
-  function setMissionIsSigned(bytes32 missionId, bool isSigned) public onlyOwner {
+  function setMissionIsSigned(bytes32 missionId, bool isSigned) public onlyLatestVersion {
     missions[missionId].isSigned = isSigned;
   }
 
