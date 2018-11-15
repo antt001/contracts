@@ -221,6 +221,22 @@ contract('RideHailingMission', function(accounts) {
     xit('should fail if account funding the mission does not have enough tokens');
     xit('should fail if buyer id and mission id do not match');
     xit('should increase the balance of the contract by the mission cost');
+
+    it('should return correct change', async () => {
+      let actualPrice = 10;
+      await MissionContract.finalizeWithPrice(missionId, actualPrice, {from: vehicle.wallet});
+      const events = await signedEvent.get();
+      let createdMissionId = events[0].args.id;
+      assert.equal(events.length, 1);
+      assert.equal(Buffer.from(createdMissionId.substr(2), 'hex').toString(), missionId);
+
+      let vehicleTokenBalance = await IdentityContract.getBalance(vehicle.id);
+      assert.equal(vehicleTokenBalance.toNumber(), actualPrice);
+
+      let userTokenBalance = await IdentityContract.getBalance(user.id);
+      assert.equal(userTokenBalance.toNumber(), userAirdropAmount - actualPrice);
+    });
+
   });
 
 });
